@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime, timezone
 import uuid
-from backend.db import Base
+from db import Base
 
 class Candidate(Base):
     __tablename__ = "candidates"

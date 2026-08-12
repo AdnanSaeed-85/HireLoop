@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, Text, Integer, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime, timezone
 import uuid
-from backend.db import Base
+from db import Base
 
 class JobDescription(Base):
     __tablename__ = "job_descriptions"
