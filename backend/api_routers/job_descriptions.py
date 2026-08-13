@@ -52,6 +52,14 @@ def jd_update(job_id: str, request: JDUpdateRequest, db: Session = Depends(get_d
     return jd
 
 
+@router.get('/{job_id}', status_code=200, response_model=JDResponse)
+def jd_by_id(job_id: str, db: Session = Depends(get_db)):
+    jd = db.query(JobDescription).filter(JobDescription.job_id == job_id).first()
+    if not jd:
+        raise HTTPException(status_code=404, detail="Job description not found")
+    return jd
+
+
 @router.delete('/delete/{job_id}', status_code=200)
 def delete_jd(job_id: str, db: Session = Depends(get_db)):
     jd = db.query(JobDescription).filter(JobDescription.job_id == job_id).first()
