@@ -2,8 +2,7 @@ from sqlalchemy import Column, String, DateTime, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime, timezone
 import uuid
-from db import Base
-
+from backend.db import Base
 
 class Setting(Base):
     __tablename__ = "settings"

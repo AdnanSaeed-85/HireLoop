@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Integer, Bool
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime, timezone
 import uuid
-from db import Base
+from backend.db import Base
 
 class ConversationalChat(Base):
     __tablename__ = "conversational_chat"

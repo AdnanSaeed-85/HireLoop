@@ -2,8 +2,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Integer
 from datetime import datetime, timezone
 import uuid
-from db import Base
-
+from backend.db import Base
 
 class SupervisorLog(Base):
     __tablename__ = "supervisor_logs"

@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime, timezone
 import uuid
-from db import Base
+from backend.db import Base
 
 class HitlDecision(Base):
     __tablename__ = "hitl_decisions"

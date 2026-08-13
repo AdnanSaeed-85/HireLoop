@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, Boolean, Integer, Text, Foreign
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime, timezone
 import uuid
-from db import Base
+from backend.db import Base
 
 
 class ConversationalSession(Base):
