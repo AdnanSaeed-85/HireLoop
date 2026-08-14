@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.core.dependencies import get_db
-from backend.core.security import hash_password, verify_password, create_access_token
 from backend.models.job_description import JobDescription
 from backend.schemas.job_description import JDCreateRequest, JDResponse, JDUpdateRequest
 
