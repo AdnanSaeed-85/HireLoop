@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from uuid import UUID
 
 class JDCreateRequest(BaseModel):
     title: str
@@ -17,7 +18,7 @@ class JDUpdateRequest(BaseModel):
     is_active: Optional[bool] = None
 
 class JDResponse(BaseModel):
-    job_id: str
+    job_id: UUID
     title: str
     description: str
     requirements: Optional[str] = None

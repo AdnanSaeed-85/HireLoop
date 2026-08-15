@@ -1,2 +1,4 @@
 .venv
-.env
+.envfocused-veld-481411-r0-642dd32d60a9.json
+__pycache__/
+*.pyc

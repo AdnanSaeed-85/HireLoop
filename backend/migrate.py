@@ -1,14 +1,14 @@
-from db import Base, engine
-from models.candidate_personal_data import Candidate
-from models.candidate_cv_data import CandidateProfile
-from models.job_description import JobDescription
-from models.application import Application
-from models.hitl import HitlDecision
-from models.log_by_supervisor import SupervisorLog
-from models.hr_admin import HrAdmin
-from models.setting import Setting
-from models.conversation_session import ConversationalSession
-from models.conversation_chat import ConversationalChat
+from backend.db import Base, engine
+from backend.models.candidate_personal_data import Candidate
+from backend.models.candidate_cv_data import CandidateProfile
+from backend.models.job_description import JobDescription
+from backend.models.application import Application
+from backend.models.hitl import HitlDecision
+from backend.models.log_by_supervisor import SupervisorLog
+from backend.models.hr_admin import HrAdmin
+from backend.models.setting import Setting
+from backend.models.conversation_session import ConversationalSession
+from backend.models.conversation_chat import ConversationalChat
 
 print(Base.metadata.tables.keys())
 Base.metadata.create_all(bind=engine)

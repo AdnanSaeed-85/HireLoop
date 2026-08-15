@@ -8,6 +8,7 @@ class Candidate(Base):
     __tablename__ = "candidates"
 
     candidate_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cv_hash = Column(String, nullable=True, unique=True)
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=True)
