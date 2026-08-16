@@ -4,8 +4,10 @@ from backend.core.dependencies import get_db
 from backend.models.candidate_personal_data import Candidate
 from backend.models.application import Application
 from backend.models.job_description import JobDescription
-from backend.schemas.apply import CandidateApplyRequest
+from backend.ai.state import PipelineState
+from backend.ai.graph import pipeline
 import hashlib
+
 
 router = APIRouter(prefix="/api/apply", tags=["Candidate_Application"])
 
@@ -30,7 +32,7 @@ async def submit_application(
     cv_bytes = await cv.read()
     cv_hash = hashlib.sha256(cv_bytes).hexdigest()
 
-    # validate job exists
+    # validate job exists, if job and status of job is_active then candidate is able to apply otherwise not.
     job = db.query(JobDescription).filter(JobDescription.job_id == job_id, JobDescription.is_active == True).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found or inactive")
@@ -79,5 +81,24 @@ async def submit_application(
 
     # trigger agent pipeline here next
     print(f"New application received: {name} for {job.title}")
+
+    # trigger cv parser agent
+    state: PipelineState = {
+        "candidate_id": str(candidate.candidate_id),
+        "job_id": job_id,
+        "application_id": str(application.application_id),
+        "job_role": job.title,
+        "cv_bytes": cv_bytes,
+        "cv_hash": cv_hash,
+        "cv_text": "",
+        "extracted_profile": {},
+        "clean_cv": {},
+        "jd_data": {},
+        "score": {},
+        "status": "started",
+        "error": None
+    }
+
+    pipeline.invoke(state)
 
     return {"message": "Application submitted successfully", "candidate_id": str(candidate.candidate_id)}

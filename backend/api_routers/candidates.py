@@ -5,7 +5,7 @@ from backend.schemas.candidate import CandidateResponse
 from backend.models.candidate_personal_data import Candidate
 from backend.models.application import Application
 from backend.schemas.application import ApplicationResponse
-
+from backend.models.setting import Setting
 
 router = APIRouter(prefix="/api/candidate", tags=["Candidate_Section"])
 
@@ -36,3 +36,14 @@ def get_by_job(job_id: str, db: Session = Depends(get_db)):
     if not applications:
         raise HTTPException(status_code=404, detail="No candidates found for this job")
     return applications
+
+@router.get('/shortlisted/{job_id}', response_model=list[ApplicationResponse], status_code=200)
+def shortlisted(job_id: str, db: Session = Depends(get_db)):
+    candidates = db.query(Application).filter(
+        Application.job_id == job_id, Application.status == "shortlisted"
+    ).order_by(Application.overall_score.desc()).all()
+
+    if not candidates:
+        raise HTTPException(status_code=404, detail="No shortlisted candidates found for this job")
+
+    return candidates

@@ -12,7 +12,6 @@ class ApplicationOutput(BaseModel):
     project_score: Optional[float] = None
     education_score: Optional[float] = None
     scoring_reasoning: Optional[str] = None
-    bias_report: Optional[str] = None
 
 class ApplicationResponse(BaseModel):
     application_id: str
@@ -25,7 +24,6 @@ class ApplicationResponse(BaseModel):
     project_score: Optional[float] = None
     education_score: Optional[float] = None
     scoring_reasoning: Optional[str] = None
-    bias_report: Optional[str] = None
 
     class Config:
         from_attributes = True

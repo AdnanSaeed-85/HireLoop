@@ -17,6 +17,5 @@ class Application(Base):
     project_score = Column(Float, nullable=True)
     education_score = Column(Float, nullable=True)
     scoring_reasoning = Column(Text, nullable=True)
-    bias_report = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

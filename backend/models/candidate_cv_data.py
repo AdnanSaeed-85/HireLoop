@@ -9,6 +9,7 @@ class CandidateProfile(Base):
 
     profile_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     candidate_id = Column(UUID(as_uuid=True), ForeignKey("candidates.candidate_id"), nullable=False)
+    n_exp = Column(Text, nullable=True)
     skills = Column(Text, nullable=True)
     experience = Column(Text, nullable=True)
     projects = Column(Text, nullable=True)

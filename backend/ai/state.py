@@ -9,7 +9,6 @@ class PipelineState(TypedDict):
     cv_hash: str
     cv_text: str
     extracted_profile: dict
-    clean_cv: dict
     jd_data: dict
     score: dict
     status: str

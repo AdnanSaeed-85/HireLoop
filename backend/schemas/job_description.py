@@ -7,14 +7,12 @@ class JDCreateRequest(BaseModel):
     description: str
     requirements: Optional[str] = None
     experience_years: Optional[int] = None
-    bias_enabled: bool = False
 
 class JDUpdateRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     requirements: Optional[str] = None
     experience_years: Optional[int] = None
-    bias_enabled: Optional[bool] = None
     is_active: Optional[bool] = None
 
 class JDResponse(BaseModel):
@@ -23,7 +21,6 @@ class JDResponse(BaseModel):
     description: str
     requirements: Optional[str] = None
     experience_years: Optional[int] = None
-    bias_enabled: bool
     is_active: bool
 
     class Config:

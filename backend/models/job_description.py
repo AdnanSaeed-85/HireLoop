@@ -12,6 +12,5 @@ class JobDescription(Base):
     description = Column(Text, nullable=False)
     requirements = Column(Text, nullable=True)
     experience_years = Column(Integer, nullable=True)
-    bias_enabled = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
