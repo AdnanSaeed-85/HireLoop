@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --font-sans: var(--font-jakarta);
+  --color-background: var(--background); --color-foreground: var(--foreground);
+  --color-card: var(--card); --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground);
+  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px);
+}
+:root {
+  color-scheme: light;
+  --background: #f5f8ff; --foreground: #17213b;
+  --card: #ffffff; --card-foreground: #17213b;
+  --popover: #ffffff; --popover-foreground: #17213b;
+  --primary: #3157d5; --primary-foreground: #ffffff;
+  --secondary: #eaf0ff; --secondary-foreground: #263f9b;
+  --muted: #edf2fb; --muted-foreground: #6b7692;
+  --accent: #edf2ff; --accent-foreground: #243c91;
+  --destructive: #dc4c64; --border: #dce4f2; --input: #dce4f2; --ring: #3157d5;
+  --sidebar: #fbfcff; --sidebar-foreground: #17213b; --radius: .75rem;
+}
+* { border-color: var(--border); outline-color: color-mix(in srgb, var(--ring) 45%, transparent); }
+html { background: var(--background); scroll-behavior: smooth; }
+body { min-height: 100vh; background: var(--background); color: var(--foreground); }
+button, a, input, select, textarea { transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, transform .2s ease; }
+button { cursor: pointer; }
+::selection { background: color-mix(in srgb, var(--primary) 20%, transparent); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
