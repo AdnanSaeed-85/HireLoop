@@ -58,11 +58,7 @@ def book_calendar_event(candidate_name: str, candidate_email: str, hr_email: str
             "end": {
                 "dateTime": (interview_datetime + timedelta(hours=1)).isoformat(),
                 "timeZone": "Asia/Karachi"
-            },
-            "attendees": [
-                {"email": hr_email},
-                {"email": candidate_email}
-            ]
+            }
         }
 
         event = service.events().insert(calendarId=CALENDAR_ID, body=event, sendUpdates="all").execute()

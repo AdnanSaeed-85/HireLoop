@@ -13,7 +13,6 @@ def jd_create(request: JDCreateRequest, db: Session = Depends(get_db)):
         description=request.description,
         requirements=request.requirements,
         experience_years=request.experience_years,
-        bias_enabled=request.bias_enabled
     )
     db.add(new_jd)
     db.commit()
@@ -41,8 +40,6 @@ def jd_update(job_id: str, request: JDUpdateRequest, db: Session = Depends(get_d
         jd.requirements = request.requirements
     if request.experience_years is not None:
         jd.experience_years = request.experience_years
-    if request.bias_enabled is not None:
-        jd.bias_enabled = request.bias_enabled
     if request.is_active is not None:
         jd.is_active = request.is_active
 
