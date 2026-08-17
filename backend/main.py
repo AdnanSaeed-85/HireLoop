@@ -6,8 +6,18 @@ from backend.api_routers.hitl import router as hitl_router
 from backend.api_routers.applications import router as application_router
 from backend.api_routers.chat import router as chat_router
 from backend.api_routers.apply import router as apply_router
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="HireLoop", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://192.168.100.37:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(jd_des_router)
