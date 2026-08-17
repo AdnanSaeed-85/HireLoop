@@ -14,9 +14,9 @@ class ApplicationOutput(BaseModel):
     scoring_reasoning: Optional[str] = None
 
 class ApplicationResponse(BaseModel):
-    application_id: str
-    candidate_id: str
-    job_id: str
+    application_id: UUID
+    candidate_id: UUID
+    job_id: UUID
     status: str
     overall_score: Optional[float] = None
     skills_score: Optional[float] = None
@@ -27,3 +27,4 @@ class ApplicationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        json_encoders = {UUID: str}

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from uuid import UUID
 
 class CandidatePersonalOutput(BaseModel):
     name: str
@@ -19,7 +20,7 @@ class CandidateCVOutput(BaseModel):
     raw_text: Optional[str] = None
 
 class CandidateResponse(BaseModel):
-    candidate_id: str
+    candidate_id: UUID
     name: str
     email: str
     phone: Optional[str] = None
@@ -30,3 +31,4 @@ class CandidateResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        json_encoders = {UUID: str}
