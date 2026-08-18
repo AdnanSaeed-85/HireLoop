@@ -2,11 +2,22 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from backend.ai.state import PipelineState
-from backend.db import SessionLocal
+from backend.db import SessionLocal, Base, engine
 from backend.models.application import Application
 from backend.models.setting import Setting
+import traceback
 
 load_dotenv()
+
+# Ensure all models are imported for migration
+from backend.models.candidate_personal_data import Candidate
+from backend.models.candidate_cv_data import CandidateProfile
+from backend.models.job_description import JobDescription
+from backend.models.hitl import HitlDecision
+from backend.models.log_by_supervisor import SupervisorLog
+from backend.models.hr_admin import HrAdmin
+from backend.models.conversation_session import ConversationalSession
+from backend.models.conversation_chat import ConversationalChat
 
 llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
 
@@ -118,6 +129,9 @@ def analyzer_agent(state: PipelineState) -> PipelineState:
             "recommendation": result.recommendation
         }
         
+        # Ensure database tables exist
+        Base.metadata.create_all(bind=engine)
+        
         # store scores in database
         db = SessionLocal()
         application = db.query(Application).filter(
@@ -126,12 +140,29 @@ def analyzer_agent(state: PipelineState) -> PipelineState:
 
         if application:
             application.skills_score = result.skills.score
+            application.skills_matched = str(result.skills.matched_skills)
+            application.skills_missing = str(result.skills.missing_skills)
+            application.skills_reasoning = result.skills.reasoning
+            
             application.experience_score = result.experience.score
+            application.experience_years_found = result.experience.years_found
+            application.experience_years_required = result.experience.years_required
+            application.experience_reasoning = result.experience.reasoning
+            
             application.project_score = result.projects.score
+            application.project_relevent = str(result.projects.relevant_projects)
+            application.project_reasoning = result.projects.reasoning
+            
             application.education_score = result.education.score
-            application.overall_score = result.education.score
-            application.scoring_reasoning = overall_score
-            application.status = "analyzed"
+            application.education_degree = result.education.degree_found
+            application.education_reasoning = result.education.reasoning
+            
+            application.overall_score = overall_score
+            application.scoring_reasoning = result.overall_reasoning
+            application.recommendation = result.recommendation
+            
+            application.status = 'analyzed'
+
 
             # fetch threshold from settings
             setting = db.query(Setting).first()
@@ -147,9 +178,13 @@ def analyzer_agent(state: PipelineState) -> PipelineState:
         db.close()
         state["status"] = "analyzed"
 
+
     except Exception as e:
+        traceback.print_exc()
+
         state["error"] = f"Analyzer failed: {str(e)}"
         state["status"] = "failed"
+
     print("Analyzer Agent running...")
     return state
 
@@ -165,7 +200,7 @@ if __name__ == "__main__":
 
     state: PipelineState = {
         "candidate_id": "512a9cc2-83c4-4a49-9ff0-3fbb1299ed76",
-        "job_id": "b3e4bdbe-f37a-483a-b7f2-f9a7737bc1ab",
+        "job_id": "48b3fda4-3db7-4927-8d6c-0b2ab2ad1c12",
         "application_id": "23fcf5a6-2c46-4b10-bc1d-b88421efd054",
         "job_role": "AI Engineer",
         "cv_bytes": cv_bytes,
@@ -179,11 +214,18 @@ if __name__ == "__main__":
     }
 
     cv_parser_agent(state)
-    # print("Extracted profile after parser:", state.get("extracted_profile"))
+    print("Extracted profile after parser:", state.get("extracted_profile"))
     jd_fetch_agent(state)
-    # print("JD Fetched after Extracted profile:", state.get("jd_data"))
+    print("JD Fetched after Extracted profile:", state.get("jd_data"))
     result = analyzer_agent(state)
     print()
     print()
     print()
     print("Full Result:", result["score"])
+    print()
+    print()
+    print("Status:", result["status"])
+    print()
+    print()
+    print("Error:", result["error"])
+    print("Score:", result["score"])

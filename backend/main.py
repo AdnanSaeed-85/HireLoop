@@ -8,8 +8,13 @@ from backend.api_routers.chat import router as chat_router
 from backend.api_routers.apply import router as apply_router
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api_routers.settings import router as settings_router
+from backend.db import create_db_and_tables
 
 app = FastAPI(title="HireLoop", version="1.0.0")
+
+@app.on_event("startup")
+def startup_event():
+    create_db_and_tables()
 
 app.add_middleware(
     CORSMiddleware,

@@ -37,27 +37,27 @@ def jd_fetch_agent(state: PipelineState) -> PipelineState:
     return state
 
 
-if __name__ == "__main__":
-    from backend.ai.state import PipelineState
+# if __name__ == "__main__":
+#     from backend.ai.state import PipelineState
     
-    state: PipelineState = {
-        "candidate_id": "test-123",
-        "job_id": "5d5fb998-6146-452f-a18a-d3d70d79a8e2",
-        "application_id": "test-app-123",
-        "job_role": "AI Engineer",
-        "cv_bytes": b"",
-        "cv_hash": "test-hash",
-        "cv_text": "",
-        "extracted_profile": {},
-        "clean_cv": {},
-        "jd_data": {},
-        "score": {},
-        "status": "started",
-        "error": None
-    }
+#     state: PipelineState = {
+#         "candidate_id": "test-123",
+#         "job_id": "5d5fb998-6146-452f-a18a-d3d70d79a8e2",
+#         "application_id": "test-app-123",
+#         "job_role": "AI Engineer",
+#         "cv_bytes": b"",
+#         "cv_hash": "test-hash",
+#         "cv_text": "",
+#         "extracted_profile": {},
+#         "clean_cv": {},
+#         "jd_data": {},
+#         "score": {},
+#         "status": "started",
+#         "error": None
+#     }
 
-    result = jd_fetch_agent(state)
-    print("Status:", result["job_id"])
-    print("Status:", result["status"])
-    print("JD Data:", result["jd_data"])
-    print("Error:", result["error"])
+#     result = jd_fetch_agent(state)
+#     print("Status:", result["job_id"])
+#     print("Status:", result["status"])
+#     print("JD Data:", result["jd_data"])
+#     print("Error:", result["error"])

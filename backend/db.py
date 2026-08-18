@@ -14,6 +14,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
+def create_db_and_tables() -> None:
+    """Import all model modules and create the required PostgreSQL schema."""
+    import backend.models  # noqa: F401
+    Base.metadata.create_all(bind=engine)
+
+
 def get_db():
     db = SessionLocal()
     try:

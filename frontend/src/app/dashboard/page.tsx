@@ -120,7 +120,7 @@ export default function DashboardPage() {
   })()
 
   const pipelineData = (() => {
-    const stages = ["pending", "screening", "interview", "offer"]
+  const stages = ["pending", "shortlisted", "manual_review", "rejected"]
     return stages.map((stage) => ({
       stage,
       value: applications.filter((a) => a.status?.toLowerCase() === stage).length,
@@ -140,20 +140,24 @@ export default function DashboardPage() {
     .sort((a, b) => (b.overall_score ?? 0) - (a.overall_score ?? 0))
     .slice(0, 4)
 
-  const recentActivity = [...applications]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5)
-    .map((app) => ({
-      title: `New application from ${app.candidate_name ?? "a candidate"}`,
-      meta: app.created_at
-        ? new Date(app.created_at).toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
-    }))
+  const recentActivity = (() => {
+  const candidateMap: Record<string, string> = {}
+  candidates.forEach((c) => { candidateMap[c.candidate_id] = c.name })
+    return [...applications]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5)
+      .map((app) => ({
+        title: `New application from ${candidateMap[app.candidate_id] ?? "a candidate"}`,
+        meta: app.created_at
+          ? new Date(app.created_at).toLocaleString([], {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "",
+      }))
+  })()
 
   if (loading) {
     return (
