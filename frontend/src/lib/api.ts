@@ -14,6 +14,12 @@ const headers = () => ({
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
+export const getMe = async () => {
+  const res = await fetch(`${API_URL}/api/auth/me`, { headers: headers() })
+  if (!res.ok) throw new Error("Failed to fetch user")
+  return res.json()
+}
+
 export const login = async (email: string, password: string) => {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
@@ -185,12 +191,6 @@ export const getChatHistory = async (sessionId: string) => {
 
 // ─── APPLY (PUBLIC) ───────────────────────────────────────────────────────────
 
-export const getActiveJobs = async () => {
-  const res = await fetch(`${API_URL}/api/jd/all`)
-  if (!res.ok) throw new Error("Failed to fetch jobs")
-  return res.json()
-}
-
 export const submitApplication = async (formData: FormData) => {
   const res = await fetch(`${API_URL}/api/apply/submit`, {
     method: "POST",
@@ -199,17 +199,28 @@ export const submitApplication = async (formData: FormData) => {
   if (!res.ok) throw new Error("Failed to submit application")
   return res.json()
 }
+export const getActiveJobs = async () => {
+  const res = await fetch(`${API_URL}/api/jd/active`)
+  if (!res.ok) throw new Error("Failed to fetch jobs")
+  return res.json()
+}
+
+export const getAllJobs = async () => {
+  const res = await fetch(`${API_URL}/api/jd/all`, { headers: headers() })
+  if (!res.ok) throw new Error("Failed to fetch jobs")
+  return res.json()
+}
 
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 
 export const getSettings = async () => {
-  const res = await fetch(`${API_URL}/api/settings`, { headers: headers() })
+  const res = await fetch(`${API_URL}/api/settings/`, { headers: headers() })
   if (!res.ok) throw new Error("Failed to fetch settings")
   return res.json()
 }
 
 export const updateSettings = async (data: object) => {
-  const res = await fetch(`${API_URL}/api/settings`, {
+  const res = await fetch(`${API_URL}/api/settings/update`, {
     method: "PUT",
     headers: headers(),
     body: JSON.stringify(data)

@@ -129,7 +129,8 @@ def analyzer_agent(state: PipelineState) -> PipelineState:
             application.experience_score = result.experience.score
             application.project_score = result.projects.score
             application.education_score = result.education.score
-            application.scoring_reasoning = result.overall_reasoning
+            application.overall_score = result.education.score
+            application.scoring_reasoning = overall_score
             application.status = "analyzed"
 
             # fetch threshold from settings

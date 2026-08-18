@@ -3,6 +3,9 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { getPendingHITL, getMe } from "@/lib/api"
+import ChatBot from "@/components/chatbot"
+import { toast } from "sonner"
 import {
   BriefcaseBusiness,
   Users,
@@ -23,7 +26,7 @@ const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Jobs", href: "/dashboard/jobs", icon: BriefcaseBusiness },
   { label: "Candidates", href: "/dashboard/candidates", icon: Users },
-  { label: "Human review", href: "/dashboard/human-review", icon: ShieldCheck, badge: 3 },
+  { label: "Human review", href: "/dashboard/human-review", icon: ShieldCheck },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
@@ -32,23 +35,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const [user, setUser] = useState<{ name: string; initials: string } | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    if (!token) {
-      router.push("/login")
-      return
-    }
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]))
-      const name = payload.name || payload.sub || "User"
-      const parts = name.split(" ")
+    getPendingHITL()
+      .then((data) => setPendingCount(Array.isArray(data) ? data.length : 0))
+      .catch(() => setPendingCount(0))
+  }, [])
+
+  useEffect(() => {
+  const token = localStorage.getItem("token")
+  if (!token) {
+    router.push("/login")
+    return
+  }
+  getMe()
+    .then((data) => {
+      const parts = data.name.trim().split(" ")
       const initials = parts.map((p: string) => p[0]).join("").toUpperCase().slice(0, 2)
-      setUser({ name, initials })
-    } catch {
-      setUser({ name: "Sam Lee", initials: "SL" })
-    }
-  }, [router])
+      setUser({ name: data.name, initials })
+    })
+    .catch(() => {
+      router.push("/login")
+    })
+}, [router])
 
   useEffect(() => {
     setSidebarOpen(false)
@@ -95,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Nav */}
         <nav className="flex flex-col gap-1 p-3 flex-1">
-          {navItems.map(({ label, href, icon: Icon, badge }) => {
+          {navItems.map(({ label, href, icon: Icon }) => {
             const active = pathname === href
             return (
               <Link
@@ -110,15 +120,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <Icon className="size-4 shrink-0" />
                 <span className="flex-1">{label}</span>
-                {badge && (
+                {label === "Human review" && pendingCount > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#3346d3] px-1 text-[10px] font-bold text-white">
-                    {badge}
+                    {pendingCount}
                   </span>
                 )}
               </Link>
             )
           })}
         </nav>
+
+                {/* Share form button */}
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => {
+              const link = `${window.location.origin}/apply`
+              navigator.clipboard.writeText(link)
+              toast.success("Application link copied to clipboard!")
+            }}
+            className="flex w-full items-center gap-2 rounded-xl border border-dashed border-[#3346d3]/40 bg-[#3346d3]/5 px-3 py-2.5 text-sm font-semibold text-[#3346d3] hover:bg-[#3346d3]/10 transition-colors"
+          >
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            Share application form
+          </button>
+        </div>
+
+        {/* Upgrade banner */}
 
         {/* Upgrade banner */}
         <div className="m-3 rounded-2xl bg-[#3346d3] p-4">
@@ -145,21 +174,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
 
             {/* Search */}
-            <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 w-full max-w-xs sm:max-w-sm">
-              <Search className="size-4 text-gray-400 shrink-0" />
-              <input
-                className="bg-transparent text-sm outline-none placeholder-gray-400 w-full min-w-0"
-                placeholder="Search candidates, jobs..."
-              />
-            </label>
+              <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 w-full max-w-xs sm:max-w-sm">
+                <Search className="size-4 text-gray-400 shrink-0" />
+                <input
+                  className="bg-transparent text-sm outline-none placeholder-gray-400 w-full min-w-0 cursor-text text-gray-700"
+                  placeholder="Search candidates, jobs..."
+                />
+              </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Bell */}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white">
-              <Bell className="size-4 text-gray-500" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#3346d3]" />
-            </button>
 
             {/* User */}
             <div className="flex items-center gap-2">
@@ -190,11 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Chat bubble — fixed, outside overflow container so it always shows */}
-      <button className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#3346d3] shadow-lg text-white">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      </button>
+            <ChatBot />
     </div>
   )
 }

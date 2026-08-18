@@ -13,6 +13,7 @@ def jd_create(request: JDCreateRequest, db: Session = Depends(get_db)):
         description=request.description,
         requirements=request.requirements,
         experience_years=request.experience_years,
+        is_active=request.is_active,
     )
     db.add(new_jd)
     db.commit()
@@ -25,6 +26,10 @@ def jd_get_all(db: Session = Depends(get_db)):
     jobs = db.query(JobDescription).all()
     return jobs
 
+@router.get('/active', response_model=list[JDResponse], status_code=200)
+def jd_get_active(db: Session = Depends(get_db)):
+    jobs = db.query(JobDescription).filter(JobDescription.is_active == True).all()
+    return jobs
 
 @router.put('/update/{job_id}', response_model=JDResponse, status_code=200)
 def jd_update(job_id: str, request: JDUpdateRequest, db: Session = Depends(get_db)):

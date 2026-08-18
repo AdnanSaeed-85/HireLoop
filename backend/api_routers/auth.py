@@ -4,8 +4,21 @@ from backend.core.dependencies import get_db
 from backend.core.security import hash_password, verify_password, create_access_token
 from backend.models.hr_admin import HrAdmin
 from backend.schemas.auth import HrRegisterRequest, HrLoginRequest, TokenResponse
+from fastapi import APIRouter, Depends, HTTPException, Header
+from backend.core.security import verify_token
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
+@router.get("/me")
+def get_me(authorization: str = Header(...), db: Session = Depends(get_db)):
+    token = authorization.replace("Bearer ", "")
+    payload = verify_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    hr = db.query(HrAdmin).filter(HrAdmin.email == payload.get("email")).first()
+    if not hr:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"name": hr.name, "email": hr.email, "role": hr.role}
 
 @router.post("/register", response_model=TokenResponse)
 def register(request: HrRegisterRequest, db: Session = Depends(get_db)):

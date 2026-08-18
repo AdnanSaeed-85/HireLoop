@@ -7,7 +7,7 @@ from backend.api_routers.applications import router as application_router
 from backend.api_routers.chat import router as chat_router
 from backend.api_routers.apply import router as apply_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from backend.api_routers.settings import router as settings_router
 
 app = FastAPI(title="HireLoop", version="1.0.0")
 
@@ -26,6 +26,7 @@ app.include_router(hitl_router)
 app.include_router(application_router)
 app.include_router(chat_router)
 app.include_router(apply_router)
+app.include_router(settings_router)
 
 @app.get("/")
 def root():

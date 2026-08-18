@@ -7,6 +7,7 @@ class JDCreateRequest(BaseModel):
     description: str
     requirements: Optional[str] = None
     experience_years: Optional[int] = None
+    is_active: bool = True
 
 class JDUpdateRequest(BaseModel):
     title: Optional[str] = None

@@ -2,13 +2,21 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { motion } from "framer-motion"
-import { BriefcaseBusiness, Search, Plus, MoreHorizontal, X } from "lucide-react"
+import {
+  BriefcaseBusiness,
+  Search,
+  Plus,
+  MoreHorizontal,
+  X,
+  Check,
+} from "lucide-react"
 import { getJobs, createJob, deleteJob } from "@/lib/api"
 import { StatusPill } from "@/components/status-pill"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
-const card = "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_35px_rgba(29,78,216,.05)]"
+const card =
+  "rounded-2xl border border-gray-100 bg-white shadow-[0_10px_35px_rgba(29,78,216,.05)]"
 
 interface Job {
   job_id: string
@@ -19,6 +27,22 @@ interface Job {
   is_active: boolean
 }
 
+interface JobForm {
+  title: string
+  description: string
+  requirements: string
+  experience_years: string
+  is_active: boolean
+}
+
+const initialForm: JobForm = {
+  title: "",
+  description: "",
+  requirements: "",
+  experience_years: "",
+  is_active: true,
+}
+
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,12 +51,7 @@ export default function JobsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    requirements: "",
-    experience_years: "",
-  })
+  const [form, setForm] = useState<JobForm>(initialForm)
 
   useEffect(() => {
     fetchJobs()
@@ -43,6 +62,7 @@ export default function JobsPage() {
       const data = await getJobs()
       setJobs(data)
     } catch (err) {
+      console.error(err)
       toast.error("Failed to load jobs")
     } finally {
       setLoading(false)
@@ -50,26 +70,58 @@ export default function JobsPage() {
   }
 
   const filtered = useMemo(
-    () => jobs.filter((j) => j.title.toLowerCase().includes(query.toLowerCase())),
+    () =>
+      jobs.filter((j) =>
+        j.title.toLowerCase().includes(query.toLowerCase())
+      ),
     [jobs, query]
   )
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const openCreateModal = () => {
+    setForm(initialForm)
+    setShowModal(true)
+  }
+
+  const closeCreateModal = () => {
+    if (submitting) return
+
+    setShowModal(false)
+    setForm(initialForm)
+  }
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!form.title.trim() || !form.description.trim()) return
+
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.error("Job title and description are required")
+      return
+    }
+
     setSubmitting(true)
+
     try {
       const data = await createJob({
-        title: form.title,
-        description: form.description,
-        requirements: form.requirements || undefined,
-        experience_years: form.experience_years ? parseInt(form.experience_years) : undefined,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        requirements: form.requirements.trim() || undefined,
+        experience_years: form.experience_years
+          ? parseInt(form.experience_years, 10)
+          : undefined,
+
+        // IMPORTANT:
+        // Backend expects a boolean.
+        // This sends true or false, not a string.
+        is_active: form.is_active,
       })
+
       setJobs((prev) => [data, ...prev])
-      setForm({ title: "", description: "", requirements: "", experience_years: "" })
+
+      setForm(initialForm)
       setShowModal(false)
+
       toast.success("Job created successfully")
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error("Failed to create job")
     } finally {
       setSubmitting(false)
@@ -79,9 +131,14 @@ export default function JobsPage() {
   const handleDelete = async (jobId: string) => {
     try {
       await deleteJob(jobId)
-      setJobs((prev) => prev.filter((j) => j.job_id !== jobId))
+
+      setJobs((prev) =>
+        prev.filter((j) => j.job_id !== jobId)
+      )
+
       toast.success("Job deleted")
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error("Failed to delete job")
     } finally {
       setOpenMenuId(null)
@@ -96,16 +153,23 @@ export default function JobsPage() {
           <p className="mb-2 text-xs font-extrabold uppercase tracking-[.16em] text-[#3346d3]">
             Hiring plan
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Jobs</h1>
+
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+            Jobs
+          </h1>
+
           <p className="mt-2 text-sm text-gray-500">
             Create roles, monitor applicant volume, and keep every opening moving.
           </p>
         </div>
+
         <button
-          onClick={() => setShowModal(true)}
+          type="button"
+          onClick={openCreateModal}
           className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#3346d3] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#2a3ab8] transition-colors"
         >
-          <Plus className="size-4" /> Create job
+          <Plus className="size-4" />
+          Create job
         </button>
       </div>
 
@@ -114,6 +178,7 @@ export default function JobsPage() {
         <div className="flex gap-3 border-b border-gray-100 p-3 sm:p-4">
           <label className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
             <Search className="size-4 text-gray-400 shrink-0" />
+
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -131,8 +196,14 @@ export default function JobsPage() {
         ) : filtered.length === 0 ? (
           <div className="p-8 sm:p-12 text-center">
             <BriefcaseBusiness className="mx-auto size-8 text-gray-300" />
-            <p className="mt-3 font-bold text-gray-700">No jobs found</p>
-            <p className="mt-1 text-sm text-gray-400">Try a different search or create a new role.</p>
+
+            <p className="mt-3 font-bold text-gray-700">
+              No jobs found
+            </p>
+
+            <p className="mt-1 text-sm text-gray-400">
+              Try a different search or create a new role.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
@@ -150,37 +221,64 @@ export default function JobsPage() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-extrabold text-gray-900 text-sm sm:text-base">{job.title}</h2>
-                    <StatusPill status={job.is_active ? "Active" : "Draft"} />
+                    <h2 className="font-extrabold text-gray-900 text-sm sm:text-base">
+                      {job.title}
+                    </h2>
+
+                    <StatusPill
+                      status={job.is_active ? "Active" : "Draft"}
+                    />
                   </div>
+
                   <p className="mt-0.5 truncate text-xs text-gray-400">
                     {job.experience_years
                       ? `${job.experience_years}+ years experience`
                       : "No experience requirement"}
+
                     {job.requirements
-                      ? ` · ${job.requirements.slice(0, 60)}${job.requirements.length > 60 ? "..." : ""}`
+                      ? ` · ${job.requirements.slice(0, 60)}${
+                          job.requirements.length > 60
+                            ? "..."
+                            : ""
+                        }`
                       : ""}
                   </p>
                 </div>
 
-                {/* Candidates count — hidden on smallest screens */}
+                {/* Candidates count */}
                 <div className="text-right hidden xs:block sm:block">
-                  <p className="text-lg font-extrabold text-gray-900">—</p>
-                  <p className="text-xs text-gray-400">candidates</p>
+                  <p className="text-lg font-extrabold text-gray-900">
+                    —
+                  </p>
+
+                  <p className="text-xs text-gray-400">
+                    candidates
+                  </p>
                 </div>
 
                 {/* Menu */}
                 <div className="relative shrink-0">
                   <button
-                    onClick={() => setOpenMenuId(openMenuId === job.job_id ? null : job.job_id)}
+                    type="button"
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === job.job_id
+                          ? null
+                          : job.job_id
+                      )
+                    }
                     className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-gray-100"
                   >
                     <MoreHorizontal className="size-5 text-gray-400" />
                   </button>
+
                   {openMenuId === job.job_id && (
                     <div className="absolute right-0 top-9 z-10 w-36 rounded-xl border border-gray-100 bg-white shadow-lg">
                       <button
-                        onClick={() => handleDelete(job.job_id)}
+                        type="button"
+                        onClick={() =>
+                          handleDelete(job.job_id)
+                        }
                         className="w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-red-500 hover:bg-red-50"
                       >
                         Delete job
@@ -202,36 +300,62 @@ export default function JobsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-5 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto"
           >
+            {/* Modal Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg sm:text-xl font-extrabold text-gray-900">Create a new job</h2>
-                <p className="mt-1 text-sm text-gray-400">Fill in the details to post a new role.</p>
+                <h2 className="text-lg sm:text-xl font-extrabold text-gray-900">
+                  Create a new job
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-400">
+                  Fill in the details to post a new role.
+                </p>
               </div>
+
               <button
-                onClick={() => setShowModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-gray-100"
+                type="button"
+                onClick={closeCreateModal}
+                disabled={submitting}
+                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-gray-100 disabled:opacity-50"
               >
                 <X className="size-5 text-gray-400" />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="mt-5 sm:mt-6 flex flex-col gap-4">
+            <form
+              onSubmit={handleCreate}
+              className="mt-5 sm:mt-6 flex flex-col gap-4"
+            >
+              {/* Job title */}
               <label className="text-sm font-bold text-gray-700">
                 Job title *
+
                 <input
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      title: e.target.value,
+                    })
+                  }
                   required
                   placeholder="e.g. Senior Frontend Engineer"
                   className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#3346d3] focus:ring-2 focus:ring-[#3346d3]/20"
                 />
               </label>
 
+              {/* Description */}
               <label className="text-sm font-bold text-gray-700">
-                Description *
+                Job Description *
+
                 <textarea
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      description: e.target.value,
+                    })
+                  }
                   required
                   rows={3}
                   placeholder="Describe the role and responsibilities"
@@ -239,43 +363,108 @@ export default function JobsPage() {
                 />
               </label>
 
+              {/* Requirements */}
               <label className="text-sm font-bold text-gray-700">
                 Requirements
+
                 <textarea
                   value={form.requirements}
-                  onChange={(e) => setForm({ ...form, requirements: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      requirements: e.target.value,
+                    })
+                  }
                   rows={2}
                   placeholder="List key requirements"
                   className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#3346d3] focus:ring-2 focus:ring-[#3346d3]/20"
                 />
               </label>
 
+              {/* Experience */}
               <label className="text-sm font-bold text-gray-700">
                 Experience (years)
+
                 <input
                   type="number"
                   min="0"
                   value={form.experience_years}
-                  onChange={(e) => setForm({ ...form, experience_years: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      experience_years: e.target.value,
+                    })
+                  }
                   placeholder="e.g. 3"
                   className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#3346d3] focus:ring-2 focus:ring-[#3346d3]/20"
                 />
               </label>
 
+              {/* Job Active Toggle */}
+              <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+                <div>
+                  <p className="text-sm font-bold text-gray-700">
+                    Job active
+                  </p>
+
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    {form.is_active
+                      ? "This job will be active."
+                      : "This job will be inactive."}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.is_active}
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      is_active: !form.is_active,
+                    })
+                  }
+                  className={cn(
+                    "relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#3346d3]/30",
+                    form.is_active
+                      ? "bg-[#3346d3]"
+                      : "bg-gray-300"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200",
+                      form.is_active
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    )}
+                  >
+                    {form.is_active && (
+                      <Check className="size-3 text-[#3346d3]" />
+                    )}
+                  </span>
+                </button>
+              </div>
+
+              {/* Buttons */}
               <div className="mt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="w-full sm:w-auto rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50"
+                  onClick={closeCreateModal}
+                  disabled={submitting}
+                  className="w-full sm:w-auto rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={submitting}
                   className="w-full sm:w-auto rounded-xl bg-[#3346d3] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#2a3ab8] disabled:opacity-60"
                 >
-                  {submitting ? "Creating..." : "Create job"}
+                  {submitting
+                    ? "Creating..."
+                    : "Create job"}
                 </button>
               </div>
             </form>
